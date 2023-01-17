@@ -10,31 +10,29 @@
         <v-card-actions>
           <v-spacer />
           <v-btn color="primary" width="100" outlined @click="closeDialog"> キャンセル </v-btn>
-          <v-btn color="primary" width="100" @click="execution"> 実行 </v-btn>
+          <v-btn color="primary" width="100" @click="execDownloadCSV"> 実行 </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
   </v-container>
 </template>
 <script>
+import downloadCsv from "download-csv";
 export default {
   props: {
     showDialog: Boolean,
+    appUserList: Array,
   },
-  data: () => ({
-    inputFile: null,
-    fileObject: "",
-  }),
+  data: () => ({}),
   computed: {},
   methods: {
     closeDialog() {
       this.$emit("close", false);
     },
     // 取り込みダイアログ ：実行
-    execution() {
-      // TODO: DL処理追加
-      alert("CSVの書き出しが完了しました。");
-
+    execDownloadCSV() {
+      // 各テーブルヘッダーと現在表示されている項目がCSV出力される
+      downloadCsv(this.appUserList);
       this.closeDialog();
       this.$emit("closeDialog", false);
     },

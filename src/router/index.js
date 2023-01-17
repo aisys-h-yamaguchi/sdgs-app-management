@@ -1,29 +1,44 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import Vue from "vue";
+import VueRouter from "vue-router";
 
-Vue.use(VueRouter)
+Vue.use(VueRouter);
 
 const routes = [
+  // 利用企業ログイン
   {
-    path: '/',
-    name: 'home',
-    component: HomeView
+    path: "/",
+    name: "LoginComponent",
+    component: () =>
+      import(/* webpackChunkName: "login" */ "../components/pages/LoginComponent.vue"),
+    // props: true,
+    // meta: {title: 'ログイン', desc: '', requiresAuth: false},
   },
+  // 管理トップ
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  }
-]
+    path: "/top",
+    name: "TopComponent",
+    component: () => import(/* webpackChunkName: "login" */ "../components/pages/TopComponent.vue"),
+  },
+  // 会社情報
+  {
+    path: "/company",
+    name: "CompanyComponent",
+    component: () =>
+      import(/* webpackChunkName: "company" */ "../components/pages/CompanyComponent.vue"),
+  },
+  // アプリ利用ユーザー登録
+  {
+    path: "/app-user",
+    name: "AppUserComponent",
+    component: () =>
+      import(/* webpackChunkName: "app-user" */ "../components/pages/AppUserComponent.vue"),
+  },
+];
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: "history",
   base: process.env.BASE_URL,
-  routes
-})
+  routes,
+});
 
-export default router
+export default router;

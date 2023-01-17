@@ -47,7 +47,6 @@ export default {
   }),
   computed: {},
   methods: {
-    // Note :vue3.0仕様
     closeDialog() {
       this.$emit("close", false);
     },

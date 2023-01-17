@@ -2,6 +2,81 @@
   <v-container>
     <PageHeadComponent :page-head-title="pageHeadTitle" />
     <v-divider class="mx-4" inset vertical></v-divider>
+    <!-- 検索メニュー -->
+    <v-menu
+      v-model="searchUserMenu"
+      :close-on-content-click="false"
+      :nudge-width="600"
+      left
+      offset-y
+    >
+      <!-- 検索ボタンを表示 -->
+      <template v-slot:activator="{ on }">
+        <v-btn absolute right outlined small v-on="on"
+          >検索
+          <v-icon right>mdi-magnify </v-icon>
+        </v-btn>
+      </template>
+      <v-card>
+        <v-card-title>
+          <div>検索</div>
+          <v-spacer></v-spacer>
+          <v-btn @click="resetSearch" absolute right outlined>
+            <v-icon>mdi-close </v-icon>
+            検索リセット
+          </v-btn>
+        </v-card-title>
+        <v-form ref="form" v-model="valid" lazy-validation>
+          <v-list>
+            <v-list-item>
+              <v-row class="ma-0">
+                <v-col>
+                  <v-list-item-subtitle>
+                    <div>メールアドレス</div>
+                  </v-list-item-subtitle>
+                  <v-text-field
+                    v-model="editedItem.mailAddress"
+                    placeholder="xxx.xxx@email.com"
+                  ></v-text-field>
+                </v-col>
+                <v-col>
+                  <v-list-item-subtitle>
+                    <div>名前</div>
+                  </v-list-item-subtitle>
+                  <v-text-field v-model="editedItem.name"></v-text-field>
+                </v-col>
+              </v-row>
+            </v-list-item>
+            <v-list-item>
+              <v-row class="ma-0">
+                <v-col>
+                  <v-list-item-subtitle>
+                    <div>表示するユーザーを選択</div>
+                  </v-list-item-subtitle>
+                  <v-radio-group v-model="userChoice" row mandatory>
+                    <v-radio label="すべてのユーザー" :value="2"></v-radio>
+                    <v-radio label="削除されたユーザー以外" :value="1"></v-radio>
+                    <v-radio label="削除されたユーザーのみ" :value="0"></v-radio>
+                  </v-radio-group>
+                </v-col>
+              </v-row>
+            </v-list-item>
+          </v-list>
+          <v-card-actions>
+            <v-btn color="primary" @click="SearchUserList" class="text-capitalize"> 検索 </v-btn>
+            <v-btn
+              text
+              outlined
+              color="primary"
+              class="text-capitalize"
+              @click="searchUserMenu = false"
+            >
+              キャンセル
+            </v-btn>
+          </v-card-actions>
+        </v-form>
+      </v-card>
+    </v-menu>
     <v-spacer></v-spacer>
     <v-data-table :headers="headers" :items="appUserList" sort-by="mailAddress" class="elevation-1">
       <!-- メールアドレス -->
@@ -41,13 +116,13 @@
         </v-btn>
       </v-col>
       <v-col>
-        <v-btn @click="openImport()" color="grey">
+        <v-btn @click="openCsvImportDialog()" color="grey">
           <v-icon left> mdi-upload </v-icon>
           CSVデータ取り込み
         </v-btn>
       </v-col>
       <v-col>
-        <v-btn @click="execDownloadCSV()" color="grey">
+        <v-btn @click="openCsvExportDialog()" color="grey">
           <v-icon left> mdi-download </v-icon>
           CSVダウンロード
         </v-btn>
@@ -64,17 +139,19 @@
         <v-card-text>
           <v-container>
             <v-row>
-              <v-col cols="12" sm="6" md="4">
+              <v-col cols="6">
                 <v-text-field
                   v-model="editedItem.mailAddress"
                   label="メールアドレス"
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" md="4">
+              <v-col cols="6">
                 <v-text-field v-model="editedItem.name" label="名前"></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" md="4">
-                <v-checkbox v-model="editedItem.status" label="ステータス"></v-checkbox>
+            </v-row>
+            <v-row>
+              <v-col>
+                <v-checkbox v-model="editedItem.status" label="削除されているユーザー"></v-checkbox>
               </v-col>
             </v-row>
           </v-container>
@@ -98,22 +175,32 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <!-- CSVデータ取り込み用ダイアログ表示 -->
+    <!-- CSVデータimport用ダイアログ表示 -->
     <CsvImportDialog :showDialog="dialogCsvImport" @close="closeImport"></CsvImportDialog>
+    <!-- CSVデータExport用ダイアログ表示 -->
+    <CsvExportDialog :showDialog="dialogCsvExport" @close="closeExport"></CsvExportDialog>
   </v-container>
 </template>
 
 <script>
 import PageHeadComponent from "../parts/PageHeadComponent.vue";
 import CsvImportDialog from "../dialogs/CsvImportDialog.vue";
+import CsvExportDialog from "../dialogs/CsvExportDialog.vue";
 export default {
   components: {
     PageHeadComponent,
     CsvImportDialog,
+    CsvExportDialog,
   },
   data: () => ({
+    // 検索用メニュー
+    searchUserMenu: false,
+    valid: true,
+    userChoice: 2,
+
     pageHeadTitle: "アプリ利用ユーザー登録",
     dialogCsvImport: false,
+    dialogCsvExport: false,
     dialogEdit: false,
     dialogDelete: false,
     headers: [
@@ -124,6 +211,7 @@ export default {
     ],
     appUserList: [],
     editedIndex: -1,
+
     editedItem: {
       name: "",
       mailAddress: "",
@@ -160,70 +248,77 @@ export default {
       this.appUserList = [
         {
           mailAddress: "aaa@gmail.com",
-          name: "Eclair",
+          name: "たろう",
           status: false,
         },
         {
-          mailAddress: "aaa@gmail.com",
-          name: "Eclair",
+          mailAddress: "bbb@gmail.com",
+          name: "じろう",
           status: true,
         },
         {
-          mailAddress: "aaa@gmail.com",
-          name: "Eclair",
+          mailAddress: "ccc@gmail.com",
+          name: "まさむね",
           status: false,
         },
         {
-          mailAddress: "aaa@gmail.com",
-          name: "Eclair",
+          mailAddress: "ddd@gmail.com",
+          name: "さぶろう",
           status: true,
         },
         {
-          mailAddress: "aaa@gmail.com",
-          name: "Eclair",
+          mailAddress: "sss@gmail.com",
+          name: "山田史郎",
           status: true,
         },
         {
-          mailAddress: "aaa@gmail.com",
+          mailAddress: "oooo@gmail.com",
           name: "Eclair",
           status: false,
         },
         {
-          mailAddress: "aaa@gmail.com",
+          mailAddress: "hhh@gmail.com",
           name: "Eclair",
           status: false,
         },
         {
-          mailAddress: "aaa@gmail.com",
+          mailAddress: "daad@gmail.com",
           name: "Eclair",
           status: false,
         },
         {
-          mailAddress: "aaa@gmail.com",
+          mailAddress: "kkk@gmail.com",
           name: "Eclair",
           status: false,
         },
         {
-          mailAddress: "aaa@gmail.com",
+          mailAddress: "iii@gmail.com",
           name: "Eclair",
           status: false,
         },
         {
-          mailAddress: "aaa@gmail.com",
+          mailAddress: "ooo@gmail.com",
           name: "Eclair",
           status: false,
         },
       ];
     },
-    // CSVデータ取り込み
-    openImport() {
+    // CSVデータをimport
+    openCsvImportDialog() {
       this.dialogCsvImport = true;
     },
-    // 取り込み：クローズ処理
+    // import：クローズ処理
     closeImport() {
       this.dialogCsvImport = false;
     },
-
+    // CSVデータをExport
+    openCsvExportDialog() {
+      this.dialogCsvExport = true;
+    },
+    // Export：クローズ処理
+    closeExport() {
+      this.dialogCsvExport = false;
+    },
     editItem(item) {
       this.editedIndex = this.appUserList.indexOf(item);
       this.editedItem = Object.assign({}, item);
@@ -266,8 +361,37 @@ export default {
       this.close();
     },
     editNewItem() {
-      // 全項目初期化
       this.dialogEdit = true;
+    },
+    // 検索条件を初期化
+    resetSearch() {
+      this.initialize();
+    },
+    // 検索条件にあったデータにフィルタリング
+    SearchUserList() {
+      this.mailAddress = this.editedItem.mailAddress;
+      this.name = this.editedItem.name;
+      let searchUserLists = this.appUserList.filter((searchUsers) => {
+        if (this.name && searchUsers.name && !searchUsers.name.includes(this.name)) {
+          return false;
+        }
+        if (this.mailAddress && searchUsers.mailAddress !== this.mailAddress) {
+          return false;
+        }
+        return true;
+      });
+      console.log(this.userChoice);
+      if (this.userChoice === 0) {
+        // 削除されたユーザーのみ表示
+        this.appUserList = searchUserLists.filter((searchUsers) => searchUsers.status === true);
+      } else if (this.userChoice === 1) {
+        // 削除されたユーザーは表示しない
+        this.appUserList = searchUserLists.filter((searchUsers) => searchUsers.status === false);
+      } else {
+        // すべてのユーザーを表示
+        this.appUserList = searchUserLists;
+      }
+      this.searchUserMenu = false;
     },
   },
 };

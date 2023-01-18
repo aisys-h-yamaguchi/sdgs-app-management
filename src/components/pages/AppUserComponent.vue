@@ -35,7 +35,7 @@
                     <div>メールアドレス</div>
                   </v-list-item-subtitle>
                   <v-text-field
-                    v-model="editedItem.mailAddress"
+                    v-model="editedItem.email"
                     placeholder="xxx.xxx@email.com"
                   ></v-text-field>
                 </v-col>
@@ -63,7 +63,7 @@
             </v-list-item>
           </v-list>
           <v-card-actions>
-            <v-btn color="primary" @click="SearchUserList" class="text-capitalize"> 検索 </v-btn>
+            <v-btn color="primary" @click="searchUserList" class="text-capitalize"> 検索 </v-btn>
             <v-btn
               text
               outlined
@@ -78,11 +78,11 @@
       </v-card>
     </v-menu>
     <v-spacer></v-spacer>
-    <v-data-table :headers="headers" :items="appUserList" sort-by="mailAddress" class="elevation-1">
+    <v-data-table :headers="headers" :items="appUserList" sort-by="email" class="elevation-1">
       <!-- メールアドレス -->
-      <template v-slot:[`item.mailAddress`]="{ item }">
+      <template v-slot:[`item.email`]="{ item }">
         <div>
-          {{ item.mailAddress }}
+          {{ item.email }}
         </div>
       </template>
       <!-- 名前 -->
@@ -97,6 +97,7 @@
           {{ "削除済" }}
         </div>
       </template>
+
       <!-- 編集・削除アイコン -->
       <template v-slot:[`item.updDel`]="{ item }">
         <v-icon medium class="mr-2" @click="editItem(item)"> mdi-pencil </v-icon>
@@ -109,19 +110,19 @@
     </v-data-table>
 
     <v-row class="pa-4">
-      <v-col>
+      <v-col cols="8">
         <v-btn color="primary" @click="editNewItem">
           <v-icon left> mdi-plus </v-icon>
           新規登録
         </v-btn>
       </v-col>
-      <v-col>
+      <v-col cols="2" class="px-1">
         <v-btn @click="openCsvImportDialog()" color="grey">
           <v-icon left> mdi-upload </v-icon>
           CSVデータ取り込み
         </v-btn>
       </v-col>
-      <v-col>
+      <v-col cols="2">
         <v-btn @click="openCsvExportDialog()" color="grey">
           <v-icon left> mdi-download </v-icon>
           CSVダウンロード
@@ -140,10 +141,7 @@
           <v-container>
             <v-row>
               <v-col cols="6">
-                <v-text-field
-                  v-model="editedItem.mailAddress"
-                  label="メールアドレス"
-                ></v-text-field>
+                <v-text-field v-model="editedItem.email" label="メールアドレス"></v-text-field>
               </v-col>
               <v-col cols="6">
                 <v-text-field v-model="editedItem.name" label="名前"></v-text-field>
@@ -197,7 +195,7 @@ export default {
     dialogEdit: false,
 
     headers: [
-      { text: "メールアドレス", value: "mailAddress", align: "start" },
+      { text: "メールアドレス", value: "email", align: "start" },
       { text: "名前", value: "name", align: "start" },
       { text: "ステータス", value: "status", align: "start" },
       { text: "編集・削除", value: "updDel", sortable: false, width: "100px", align: "start" },
@@ -207,13 +205,13 @@ export default {
 
     editedItem: {
       name: "",
-      mailAddress: "",
-      status: 0,
+      email: "",
+      status: false,
     },
     defaultItem: {
       name: "",
-      mailAddress: "",
-      status: 0,
+      email: "",
+      status: false,
     },
   }),
 
@@ -237,57 +235,57 @@ export default {
     initialize() {
       this.appUserList = [
         {
-          mailAddress: "aaa@gmail.com",
+          email: "aaa@gmail.com",
           name: "たろう",
           status: false,
         },
         {
-          mailAddress: "bbb@gmail.com",
+          email: "bbb@gmail.com",
           name: "じろう",
           status: true,
         },
         {
-          mailAddress: "ccc@gmail.com",
+          email: "ccc@gmail.com",
           name: "まさむね",
           status: false,
         },
         {
-          mailAddress: "ddd@gmail.com",
+          email: "ddd@gmail.com",
           name: "さぶろう",
           status: true,
         },
         {
-          mailAddress: "sss@gmail.com",
+          email: "sss@gmail.com",
           name: "山田史郎",
           status: true,
         },
         {
-          mailAddress: "oooo@gmail.com",
+          email: "oooo@gmail.com",
           name: "Eclair",
           status: false,
         },
         {
-          mailAddress: "hhh@gmail.com",
+          email: "hhh@gmail.com",
           name: "Eclair",
           status: false,
         },
         {
-          mailAddress: "daad@gmail.com",
+          email: "daad@gmail.com",
           name: "Eclair",
           status: false,
         },
         {
-          mailAddress: "kkk@gmail.com",
+          email: "kkk@gmail.com",
           name: "Eclair",
           status: false,
         },
         {
-          mailAddress: "iii@gmail.com",
+          email: "iii@gmail.com",
           name: "Eclair",
           status: false,
         },
         {
-          mailAddress: "ooo@gmail.com",
+          email: "ooo@gmail.com",
           name: "Eclair",
           status: false,
         },
@@ -320,7 +318,9 @@ export default {
       this.editedItem = Object.assign({}, item);
       const msg = "このデータを削除してよろしいですか？ \n ユーザー名 : " + item["name"];
       if (confirm(msg)) {
-        this.appUserList.splice(this.editedIndex, 1);
+        // TODO: レコードごと削除か、フラグを立てるだけか、要確認
+        // this.appUserList.splice(this.editedIndex, 1);
+        item["status"] = true;
       }
       this.closeDelete();
     },
@@ -356,14 +356,14 @@ export default {
       this.initialize();
     },
     // 検索条件にあったデータにフィルタリング
-    SearchUserList() {
-      this.mailAddress = this.editedItem.mailAddress;
+    searchUserList() {
+      this.email = this.editedItem.email;
       this.name = this.editedItem.name;
       let searchUserLists = this.appUserList.filter((searchUsers) => {
         if (this.name && searchUsers.name && !searchUsers.name.includes(this.name)) {
           return false;
         }
-        if (this.mailAddress && searchUsers.mailAddress !== this.mailAddress) {
+        if (this.email && searchUsers.email !== this.email) {
           return false;
         }
         return true;

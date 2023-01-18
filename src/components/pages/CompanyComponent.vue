@@ -4,7 +4,7 @@
       <!-- 共通ヘッダー -->
       <PageHeadComponent :page-head-title="pageHeadTitle" />
       <v-card class="pa-4">
-        <v-form ref="test_form" v-model="valid" lazy-validation>
+        <v-form ref="form" v-model="valid" lazy-validation>
           <h5 class="font-weight-bold mt-2 mb-4">会社情報</h5>
           <v-row class="pa-0 ma-0">
             <v-col cols="12" class="pa-0">会社名</v-col>
@@ -17,7 +17,7 @@
                 placeholder="例）株式会社〇〇"
                 autocomplete="off"
                 counter="50"
-                :rules="[required, maxlength50]"
+                :rules="[rules.required, rules.lessThan50Chars]"
                 hint="50文字まで設定できます"
                 maxlength="50"
               ></v-text-field>
@@ -34,7 +34,7 @@
                 item-value="value"
                 dense
                 filled
-                :rules="[required]"
+                :rules="[rules.required]"
               ></v-select>
             </v-col>
           </v-row>
@@ -51,7 +51,7 @@
                 placeholder="例）09012345678"
                 autocomplete="off"
                 counter="11"
-                :rules="[required, maxlength11, integer]"
+                :rules="[rules.required, rules.phoneNumber, rules.integer]"
                 hint="ハイフンなしの半角数字で入力してください"
                 style="max-width: 220px"
                 maxlength="11"
@@ -69,7 +69,7 @@
                 placeholder="例）00012345678"
                 autocomplete="off"
                 counter="11"
-                :rules="[required, maxlength11, integer]"
+                :rules="[rules.required, rules.phoneNumber, rules.integer]"
                 hint="ハイフンなしの半角数字で入力してください"
                 style="max-width: 220px"
                 maxlength="11"
@@ -89,7 +89,7 @@
                 item-value="value"
                 dense
                 filled
-                :rules="[required]"
+                :rules="[rules.required]"
                 style="max-width: 180px"
               ></v-select>
             </v-col>
@@ -106,7 +106,7 @@
                 placeholder="例）〇〇市△△区"
                 autocomplete="off"
                 counter="12"
-                :rules="[required, maxlength12]"
+                :rules="[rules.required, rules.lessThan12Chars]"
                 hint="12文字まで入力できます"
                 maxlength="12"
               ></v-text-field>
@@ -124,7 +124,7 @@
                 placeholder="例）□□□1-1-1"
                 autocomplete="off"
                 counter="250"
-                :rules="[maxlength250]"
+                :rules="[rules.lessThan12Chars]"
                 hint="250文字まで入力できます"
                 maxlength="250"
               ></v-text-field>
@@ -141,7 +141,7 @@
                 placeholder="例）〇〇マンション101"
                 autocomplete="off"
                 counter="250"
-                :rules="[maxlength250]"
+                :rules="[rules.lessThan250Chars]"
                 hint="250文字まで入力できます"
                 maxlength="250"
               ></v-text-field>
@@ -159,7 +159,7 @@
                 placeholder="例）https://xxxxxx.com"
                 autocomplete="off"
                 counter="250"
-                :rules="[maxlength250, url_rule]"
+                :rules="[rules.lessThan250Chars, rules.url_rule]"
                 hint="250文字まで入力できます"
                 maxlength="250"
               ></v-text-field>
@@ -171,10 +171,6 @@
         </v-form>
       </v-card>
     </div>
-    <!-- 情報通知用スナックバー（URLコピー時） -->
-    <v-snackbar v-model="snackbar" timeout="2000">
-      <div style="text-align: center">{{ snackbarText }}</div>
-    </v-snackbar>
     <v-overlay :value="isOverlay" :absolute="true" :opacity="0.25">
       <v-progress-circular :size="70" :width="7" indeterminate></v-progress-circular>
     </v-overlay>
@@ -183,6 +179,7 @@
 
 <script>
 import PageHeadComponent from "../parts/PageHeadComponent.vue";
+import rules from "@/shared/validation-rules.js";
 export default {
   components: {
     PageHeadComponent,
@@ -198,22 +195,11 @@ export default {
       address_city: "",
       address_other1: "",
       address_other2: "",
-      snackbar: false,
-      snackbarText: "",
       business_type: "",
       url: "",
       id: "",
       valid: true,
       isOverlay: false,
-
-      required: (value) => !!value || "必ず入力してください", // 入力必須の制約
-      maxlength50: (value) => !value || value.length <= 50 || "50文字以内で入力してください", // 文字数の制約
-      maxlength11: (value) => !value || value.length <= 11 || "11文字以内で入力してください", // 文字数の制約
-      integer: (value) => !value || value.match(/^[0-9]+$/) != null || "半角数字で入力してください", // 半角数字制約
-      maxlength12: (value) => !value || value.length <= 12 || "12文字以内で入力してください", // 文字数の制約
-      maxlength250: (value) => !value || value.length <= 250 || "250文字以内で入力してください", // 文字数の制約
-      url_rule: (value) =>
-        !value || value.match(/^http(|s):\/\/.+/) != null || "URL形式で入力してください", // URL形式の制約
 
       address_pref_list: [
         { value: "北海道", sortable: false },
@@ -307,11 +293,38 @@ export default {
         { text: "ウェブ制作・システム受託・広告代理店", value: 39, sortable: false },
         { text: "その他", value: 40, sortable: false },
       ],
+      rules: {
+        required: rules.required,
+        email: rules.email,
+        lessThan50Chars: rules.lessThan50Chars,
+        lessThan12Chars: rules.lessThan12Chars,
+        lessThan250Chars: rules.lessThan250Chars,
+        phoneNumber: rules.phoneNumber,
+        integer: rules.integer,
+        url_rule: rules.url_rule,
+      },
     };
   },
 
   methods: {
-    // 選択されているサービスID(globalParams)に紐づくサイト情報を取得。
+    save: async function () {
+      let data = {
+        name: this.name,
+        phone_number: this.phone_number,
+        fax_number: this.fax_number,
+        address_pref: this.address_pref,
+        address_city: this.address_city,
+        address_other1: this.address_other1,
+        address_other2: this.address_other2,
+        business_type: this.business_type,
+        url: this.url,
+      };
+      if (this.$refs.form.validate()) {
+        console.log("validation clear");
+        // 画面から入力した会社情報をdataにまとめて、バックエンドに渡す
+        console.log(data);
+      }
+    },
   },
 };
 </script>

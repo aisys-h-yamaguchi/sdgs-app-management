@@ -14,7 +14,7 @@ export default {
   },
   data() {
     return {
-      pageHeadTitle: "トップ",
+      pageHeadTitle: "管理者登録",
     };
   },
 

@@ -21,5 +21,8 @@
     <v-btn to="/recommended-contents" block depressed tile left height="60px">
       <v-container pa-0><v-icon left>mdi-calendar</v-icon>おすすめコンテンツ</v-container>
     </v-btn>
+    <v-btn to="/admin-user" block depressed tile left height="60px">
+      <v-container pa-0><v-icon left>mdi-calendar</v-icon>管理者登録</v-container>
+    </v-btn>
   </v-navigation-drawer>
 </template>

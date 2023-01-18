@@ -33,6 +33,43 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "app-user" */ "../components/pages/AppUserComponent.vue"),
   },
+  // 学習コンテンツ
+  {
+    path: "/learned-contents",
+    name: "LearnedContentsComponent",
+    component: () =>
+      import(
+        /* webpackChunkName: "learned-contents" */ "../components/pages/LearnedContentsComponent.vue"
+      ),
+  },
+  // ニュースリリース
+  {
+    path: "/news",
+    name: "NewsComponent",
+    component: () => import(/* webpackChunkName: "news" */ "../components/pages/NewsComponent.vue"),
+  },
+  // クイズ
+  {
+    path: "/quiz",
+    name: "QuizComponent",
+    component: () => import(/* webpackChunkName: "quiz" */ "../components/pages/QuizComponent.vue"),
+  },
+  // おすすめコンテンツ
+  {
+    path: "/recommended-contents",
+    name: "RecommendedContentsComponent",
+    component: () =>
+      import(
+        /* webpackChunkName: "recommended-contents" */ "../components/pages/RecommendedContentsComponent.vue"
+      ),
+  },
+  // 管理者登録
+  {
+    path: "/admin-user",
+    name: "AdminUserComponent",
+    component: () =>
+      import(/* webpackChunkName: "admin-user" */ "../components/pages/AdminUserComponent.vue"),
+  },
 ];
 
 const router = new VueRouter({

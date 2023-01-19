@@ -13,6 +13,7 @@
     "aws-amplify": "^5.0.10",
     "core-js": "^3.8.3",
     "download-csv": "^1.1.1",
+    "encoding-japanese": "^2.0.0",
     "vue": "^2.7.14",
     "vue-router": "^3.5.1",
     "vuetify": "^2.6.13",

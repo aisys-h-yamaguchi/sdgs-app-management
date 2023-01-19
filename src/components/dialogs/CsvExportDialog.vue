@@ -21,7 +21,7 @@ import downloadCsv from "download-csv";
 export default {
   props: {
     showDialog: Boolean,
-    appUserList: Array,
+    dataList: Array,
   },
   data: () => ({}),
   computed: {},
@@ -32,7 +32,7 @@ export default {
     // 取り込みダイアログ ：実行
     execDownloadCSV() {
       // 各テーブルヘッダーと現在表示されている項目がCSV出力される
-      downloadCsv(this.appUserList);
+      downloadCsv(this.dataList);
       this.closeDialog();
       this.$emit("closeDialog", false);
     },

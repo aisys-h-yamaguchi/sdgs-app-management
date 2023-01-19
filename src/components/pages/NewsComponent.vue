@@ -42,10 +42,16 @@
     </v-data-table>
 
     <v-row class="pa-4">
-      <v-col cols="8">
+      <v-col cols="10">
         <v-btn color="primary" @click="editNewItem">
           <v-icon left> mdi-plus </v-icon>
           新規登録
+        </v-btn>
+      </v-col>
+      <v-col cols="2">
+        <v-btn color="primary" @click="csvUpload">
+          <v-icon left> mdi-upload </v-icon>
+          CSVとして書き込む
         </v-btn>
       </v-col>
     </v-row>
@@ -221,6 +227,11 @@ export default {
       const dateStr =
         year + "/" + String(month).padStart(2, "0") + "/" + String(day).padStart(2, "0");
       return dateStr;
+    },
+
+    // TODO: 表示されてるデータをCSV形式でS3の指定箇所に保存する
+    csvUpload() {
+      console.log("csv形式でs3に保存");
     },
   },
 };

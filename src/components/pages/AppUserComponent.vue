@@ -55,8 +55,8 @@
                   </v-list-item-subtitle>
                   <v-radio-group v-model="userChoice" row mandatory>
                     <v-radio label="すべてのユーザー" :value="2"></v-radio>
-                    <v-radio label="削除されたユーザー以外" :value="1"></v-radio>
-                    <v-radio label="削除されたユーザーのみ" :value="0"></v-radio>
+                    <v-radio label="登録済ユーザー" :value="1"></v-radio>
+                    <v-radio label="削除ユーザー" :value="0"></v-radio>
                   </v-radio-group>
                 </v-col>
               </v-row>
@@ -78,11 +78,20 @@
       </v-card>
     </v-menu>
     <v-spacer></v-spacer>
-    <v-data-table :headers="headers" :items="appUserList" sort-by="email" class="elevation-1">
-      <!-- メールアドレス -->
-      <template v-slot:[`item.email`]="{ item }">
+    <v-col cols="3">
+      <!-- CSVインポート -->
+      <v-file-input
+        @change="csvImport"
+        type="file"
+        label="CSVファイルを選択"
+        prepend-icon="mdi-paperclip"
+      />
+    </v-col>
+    <v-data-table :headers="headers" :items="appUserList" sort-by="userId" class="elevation-1">
+      <!-- ユーザーID -->
+      <template v-slot:[`item.userId`]="{ item }">
         <div>
-          {{ item.email }}
+          {{ item.userId }}
         </div>
       </template>
       <!-- 名前 -->
@@ -91,10 +100,16 @@
           {{ item.name }}
         </div>
       </template>
+      <!-- メールアドレス -->
+      <template v-slot:[`item.email`]="{ item }">
+        <div>
+          {{ item.email }}
+        </div>
+      </template>
       <!-- ステータス -->
       <template v-slot:[`item.status`]="{ item }">
-        <div v-if="item.status">
-          {{ "削除済" }}
+        <div>
+          {{ item.status }}
         </div>
       </template>
 
@@ -110,20 +125,14 @@
     </v-data-table>
 
     <v-row class="pa-4">
-      <v-col cols="8">
+      <v-col cols="9">
         <v-btn color="primary" @click="editNewItem">
           <v-icon left> mdi-plus </v-icon>
           新規登録
         </v-btn>
       </v-col>
-      <v-col cols="2" class="px-1">
-        <v-btn @click="openCsvImportDialog()" color="grey">
-          <v-icon left> mdi-upload </v-icon>
-          CSVデータ取り込み
-        </v-btn>
-      </v-col>
-      <v-col cols="2">
-        <v-btn @click="openCsvExportDialog()" color="grey">
+      <v-col cols="3">
+        <v-btn @click="csvExport()" color="grey">
           <v-icon left> mdi-download </v-icon>
           CSVダウンロード
         </v-btn>
@@ -147,7 +156,7 @@
                 <v-text-field v-model="editedItem.name" label="名前"></v-text-field>
               </v-col>
             </v-row>
-            <v-row>
+            <v-row v-if="editedItem.status">
               <v-col>
                 <v-checkbox v-model="editedItem.status" label="削除されているユーザー"></v-checkbox>
               </v-col>
@@ -162,26 +171,14 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <!-- CSVデータimport用ダイアログ表示 -->
-    <CsvImportDialog :showDialog="dialogCsvImport" @close="closeImport"></CsvImportDialog>
-    <!-- CSVデータExport用ダイアログ表示 -->
-    <CsvExportDialog
-      :showDialog="dialogCsvExport"
-      :appUserList="appUserList"
-      @close="closeExport"
-    ></CsvExportDialog>
   </v-container>
 </template>
-
 <script>
 import PageHeadComponent from "../parts/PageHeadComponent.vue";
-import CsvImportDialog from "../dialogs/CsvImportDialog.vue";
-import CsvExportDialog from "../dialogs/CsvExportDialog.vue";
+import downloadCsv from "download-csv";
 export default {
   components: {
     PageHeadComponent,
-    CsvImportDialog,
-    CsvExportDialog,
   },
   data: () => ({
     // 検索用メニュー
@@ -195,8 +192,9 @@ export default {
     dialogEdit: false,
 
     headers: [
-      { text: "メールアドレス", value: "email", align: "start" },
+      { text: "ユーザーID", value: "userId", align: "start" },
       { text: "名前", value: "name", align: "start" },
+      { text: "メールアドレス", value: "email", align: "start" },
       { text: "ステータス", value: "status", align: "start" },
       { text: "編集・削除", value: "updDel", sortable: false, width: "100px", align: "start" },
     ],
@@ -204,11 +202,13 @@ export default {
     editedIndex: -1,
 
     editedItem: {
+      userId: "",
       name: "",
       email: "",
       status: false,
     },
     defaultItem: {
+      userId: "",
       name: "",
       email: "",
       status: false,
@@ -235,77 +235,79 @@ export default {
     initialize() {
       this.appUserList = [
         {
-          email: "aaa@gmail.com",
+          userId: 1,
           name: "たろう",
+          email: "aaa@gmail.com",
           status: false,
         },
         {
-          email: "bbb@gmail.com",
+          userId: 2,
           name: "じろう",
+          email: "bbb@gmail.com",
           status: true,
         },
         {
-          email: "ccc@gmail.com",
+          userId: 3,
           name: "まさむね",
+          email: "ccc@gmail.com",
           status: false,
         },
         {
-          email: "ddd@gmail.com",
+          userId: 4,
           name: "さぶろう",
+          email: "ddd@gmail.com",
           status: true,
         },
         {
-          email: "sss@gmail.com",
+          userId: 5,
           name: "山田史郎",
+          email: "sss@gmail.com",
           status: true,
         },
         {
+          userId: 6,
+          name: "Eclair",
           email: "oooo@gmail.com",
-          name: "Eclair",
           status: false,
         },
         {
+          userId: 7,
+          name: "Eclair",
           email: "hhh@gmail.com",
-          name: "Eclair",
           status: false,
         },
         {
+          userId: 8,
+          name: "Eclair",
           email: "daad@gmail.com",
-          name: "Eclair",
           status: false,
         },
         {
+          userId: 9,
+          name: "Eclair",
           email: "kkk@gmail.com",
-          name: "Eclair",
           status: false,
         },
         {
+          userId: 10,
+          name: "Eclair",
           email: "iii@gmail.com",
-          name: "Eclair",
           status: false,
         },
         {
-          email: "ooo@gmail.com",
+          userId: 11,
           name: "Eclair",
+          email: "ooo@gmail.com",
           status: false,
         },
       ];
-    },
-    // CSVデータをimport
-    openCsvImportDialog() {
-      this.dialogCsvImport = true;
-    },
-    // import：クローズ処理
-    closeImport() {
-      this.dialogCsvImport = false;
-    },
-    // CSVデータをExport
-    openCsvExportDialog() {
-      this.dialogCsvExport = true;
-    },
-    // Export：クローズ処理
-    closeExport() {
-      this.dialogCsvExport = false;
+      for (let i = 0; i < this.appUserList.length; i++) {
+        if (this.appUserList[i].status) {
+          this.appUserList[i].status = "削除済";
+        } else {
+          this.appUserList[i].status = "";
+        }
+      }
     },
     editItem(item) {
       this.editedIndex = this.appUserList.indexOf(item);
@@ -380,6 +382,48 @@ export default {
         this.appUserList = searchUserLists;
       }
       this.searchUserMenu = false;
+    },
+    // csvエクスポート処理
+    csvExport: function () {
+      // 各テーブルヘッダーと現在表示されている項目がCSV出力される
+      downloadCsv(this.appUserList);
+      this.close();
+    },
+    // csvインポート処理
+    csvImport: function (e) {
+      const file = e;
+      const reader = new FileReader();
+      const csvLists = [];
+      const Encoding = require("encoding-japanese");
+      const loadFunc = () => {
+        const lines = reader.result.split("\n");
+        lines.forEach((element) => {
+          const csvListData = element.split(",");
+          // if (csvListData.length != 3) return;
+          for (let i = 0; i <= csvListData.length; i++) {
+            // 文字列から文字コード値の配列に変換
+            const unicodeArray = Encoding.stringToCode(csvListData[i]);
+            csvListData[i] = Encoding.convert(unicodeArray, {
+              to: "UNICODE",
+              from: "UTF8",
+              type: "string",
+            });
+          }
+          var csvList = {
+            userId: csvListData[0],
+            name: csvListData[1],
+            email: csvListData[2],
+          };
+
+          csvLists.push(csvList);
+        });
+        this.appUserList = csvLists;
+      };
+
+      reader.onload = loadFunc;
+      reader.readAsBinaryString(file);
+
+      alert("CSV取り込みが完了しました。");
     },
   },
 };

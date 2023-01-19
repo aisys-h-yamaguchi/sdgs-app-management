@@ -1,7 +1,6 @@
-<!-- eslint-disable vue/no-mutating-props -->
 <template>
   <v-container fluid pa-0>
-    <v-dialog v-model="showDialog" persistent width="500px">
+    <v-dialog :modelValue="showDialog" persistent width="500px">
       <v-card>
         <v-card-title class="pa-0">
           <v-toolbar flat dark class="pa-2"> CSV取り込み </v-toolbar>
@@ -41,14 +40,16 @@ export default {
   props: {
     showDialog: Boolean,
   },
+  emits: ["update:showDialog"],
   data: () => ({
     inputFile: null,
     fileObject: "",
   }),
   computed: {},
   methods: {
+    // Note :vue3.0仕様
     closeDialog() {
-      this.$emit("close", false);
+      this.$emit("update:showDialog");
     },
     // 取り込みダイアログ ：実行
     execution() {

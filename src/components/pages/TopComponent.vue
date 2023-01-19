@@ -1,25 +1,59 @@
 <template>
-  <v-container fluid pa-0 ma-0>
-    <div style="max-width: 500px">
-      <PageHeadComponent :page-head-title="pageHeadTitle" />
-    </div>
-  </v-container>
+  <div>
+    <h1>CAVインポート</h1>
+    <input @change="fileChange" type="file" id="file_input_expense" name="file_input_expense" />
+    <v-data-table :headers="headers" :items="workers" class="elevation-1">
+      <template slot="items" slot-scope="props">
+        <td class="text-xs-right">{{ props.item.code }}</td>
+        <td class="text-xs-right">{{ props.item.name }}</td>
+        <td class="text-xs-right">{{ props.item.workerType }}</td>
+      </template>
+    </v-data-table>
+  </div>
 </template>
 
 <script>
-import PageHeadComponent from "../parts/PageHeadComponent.vue";
 export default {
-  components: {
-    PageHeadComponent,
-  },
-  data() {
+  data: function () {
     return {
-      pageHeadTitle: "トップ",
+      headers: [
+        {
+          text: "Code",
+          align: "left",
+          sortable: false,
+          value: "code",
+        },
+        { text: "Name", align: "left", value: "name" },
+        { text: "WorkerType", align: "left", value: "workerType" },
+      ],
+      workers: [],
     };
   },
-
   methods: {
-    // 選択されているサービスID(globalParams)に紐づくサイト情報を取得。
+    fileChange: function (e) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      const workers = [];
+
+      const loadFunc = () => {
+        const lines = reader.result.split("\n");
+        lines.forEach((element) => {
+          const workerData = element.split(",");
+          if (workerData.length != 3) return;
+          const worker = {
+            code: workerData[0],
+            name: workerData[1],
+            workerType: workerData[2],
+          };
+          workers.push(worker);
+        });
+        this.workers = workers;
+      };
+
+      reader.onload = loadFunc;
+
+      reader.readAsBinaryString(file);
+    },
   },
 };
 </script>

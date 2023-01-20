@@ -100,7 +100,7 @@ export default {
     valid: true,
     userChoice: 2,
 
-    pageHeadTitle: "学習コンテンツ",
+    pageHeadTitle: "学習コンテンツ（サステナビリティニュース）",
     dialogEdit: false,
 
     headers: [
@@ -115,12 +115,14 @@ export default {
     editedItem: {
       url: "",
       title: "",
+      isPdf: false,
       postedDateTime: "",
       status: false,
     },
     defaultItem: {
       url: "",
       title: "",
+      isPdf: false,
       postedDateTime: "",
       status: false,
     },
@@ -147,22 +149,25 @@ export default {
       this.newsList = [
         {
           title:
-            "国内最大規模の環境展示会『エコプロ 2022』にセブン&アイ・ホールディングスが出展商品や設備等、グループ9社及び1団体の環境への取り組みを紹介",
-          url: "https://www.7andi.com/company/news/release/202212061500.html",
+            "【セブン‐イレブン・ジャパン】世界初！非接触・空中ディスプレイ技術をPOSレジに採用 『デジPOS』の実証実験をセブン-イレブン店舗にて開始",
+          url: "https://www.sej.co.jp/company/news_release/news/2022/165442.html",
+          isPdf: false,
           postedDateTime: "2022/11/18",
           status: false,
         },
         {
           title:
-            "セブン＆アイ・ホールディングス『MSC・ASC CoC認証』を取得店内加工した認証水産物をグループのスーパー3社、461店舗で販売開始",
-          url: "https://www.7andi.com/company/news/release/202210271100.html",
+            "【セブン‐イレブン・ジャパン】鹿児島県産の食材を使用した3品を発売 『鹿児島県限定寄附金付きnanaco』を発行",
+          url: "https://www.sej.co.jp/company/news_release/news/2022/202201201000.html",
+          isPdf: false,
           postedDateTime: "2022/11/30",
           status: false,
         },
         {
           title:
-            "国内最大規模の環境展示会『エコプロ 2022』にセブン&アイ・ホールディングスが出展商品や設備等、グループ9社及び1団体の環境への取り組みを紹介",
-          url: "https://www.7andi.com/company/news/release/202210271100.html",
+            "【イトーヨーカドー】フードチェーン3領域における食品ロス削減の実証実験について～ダイナミックプライシングや購買・消費データ活用等による企業・消費者への効果を検証～",
+          url: "https://www.7andi.com/library/sustainability/news/pdf/2022/20220111_01.pdf",
+          isPdf: true,
           postedDateTime: "2022/12/30",
           status: false,
         },
@@ -231,7 +236,7 @@ export default {
 
     // TODO: 表示されてるデータをCSV形式でS3の指定箇所に保存する
     csvUpload() {
-      console.log("csv形式でs3に保存");
+      alert("csv形式でs3に保存");
     },
   },
 };

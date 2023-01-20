@@ -310,7 +310,7 @@ export default {
     },
     // TODO: 表示されてるデータをCSV形式でS3の指定箇所に保存する
     csvUpload() {
-      console.log("csv形式でs3に保存");
+      alert("csv形式でs3に保存");
     },
   },
 };

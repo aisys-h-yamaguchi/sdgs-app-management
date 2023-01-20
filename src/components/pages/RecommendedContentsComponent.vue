@@ -142,21 +142,6 @@ export default {
 
     dialogEdit: false,
 
-    headers: [
-      { text: "アイキャッチ画像", value: "image", width: "15%", align: "start" },
-      { text: "サブタイトル", value: "subtitle", width: "20%", align: "start" },
-      { text: "タイトル", value: "title", width: "20%", align: "start" },
-      { text: "URL", value: "url", width: "25%", align: "start" },
-      { text: "編集・削除", value: "updDel", sortable: false, width: "10%", align: "start" },
-      {
-        text: "表示順序",
-        value: "order",
-        sortable: false,
-        width: "10%",
-        align: "start",
-      },
-    ],
-
     contentsList: [],
     editedIndex: -1,
     editedItem: {
@@ -178,6 +163,32 @@ export default {
   }),
 
   computed: {
+    headers() {
+      if (this.changeOrderFlag) {
+        return [
+          { text: "アイキャッチ画像", value: "image", width: "15%", align: "start" },
+          { text: "サブタイトル", value: "subtitle", width: "20%", align: "start" },
+          { text: "タイトル", value: "title", width: "20%", align: "start" },
+          { text: "URL", value: "url", width: "25%", align: "start" },
+          { text: "編集・削除", value: "updDel", sortable: false, width: "10%", align: "start" },
+          {
+            text: "表示順序",
+            value: "order",
+            sortable: false,
+            width: "10%",
+            align: "start",
+          },
+        ];
+      } else {
+        return [
+          { text: "アイキャッチ画像", value: "image", width: "15%", align: "start" },
+          { text: "サブタイトル", value: "subtitle", width: "20%", align: "start" },
+          { text: "タイトル", value: "title", width: "20%", align: "start" },
+          { text: "URL", value: "url", width: "25%", align: "start" },
+          { text: "編集・削除", value: "updDel", sortable: false, width: "10%", align: "start" },
+        ];
+      }
+    },
     formTitle() {
       return this.editedIndex === -1 ? "新規" : "編集";
     },
@@ -272,7 +283,7 @@ export default {
     // 表示順を確定する
     orderDecision() {
       // TODO: 入れ替えられた順序で配列をテーブルに保存する処理
-      console.log(this.contentsList);
+      alert("表示されてる順序でコンテンツがcsv形式でS3に登録される");
       this.changeOrderFlag = false;
     },
     // 表示順序変更

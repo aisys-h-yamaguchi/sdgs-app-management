@@ -2,81 +2,7 @@
   <v-container>
     <PageHeadComponent :page-head-title="pageHeadTitle" />
     <v-divider class="mx-4" inset vertical></v-divider>
-    <!-- 検索メニュー -->
-    <v-menu
-      v-model="searchUserMenu"
-      :close-on-content-click="false"
-      :nudge-width="600"
-      left
-      offset-y
-    >
-      <!-- 検索ボタンを表示 -->
-      <template v-slot:activator="{ on }">
-        <v-btn absolute right outlined small v-on="on"
-          >検索
-          <v-icon right>mdi-magnify </v-icon>
-        </v-btn>
-      </template>
-      <v-card>
-        <v-card-title>
-          <div>検索</div>
-          <v-spacer></v-spacer>
-          <v-btn @click="resetSearch" absolute right outlined>
-            <v-icon>mdi-close </v-icon>
-            検索リセット
-          </v-btn>
-        </v-card-title>
-        <v-form ref="form" v-model="valid" lazy-validation>
-          <v-list>
-            <v-list-item>
-              <v-row class="ma-0">
-                <v-col>
-                  <v-list-item-subtitle>
-                    <div>メールアドレス</div>
-                  </v-list-item-subtitle>
-                  <v-text-field
-                    v-model="editedItem.email"
-                    placeholder="xxx.xxx@email.com"
-                  ></v-text-field>
-                </v-col>
-                <v-col>
-                  <v-list-item-subtitle>
-                    <div>名前</div>
-                  </v-list-item-subtitle>
-                  <v-text-field v-model="editedItem.name"></v-text-field>
-                </v-col>
-              </v-row>
-            </v-list-item>
-            <v-list-item>
-              <v-row class="ma-0">
-                <v-col>
-                  <v-list-item-subtitle>
-                    <div>表示するユーザーを選択</div>
-                  </v-list-item-subtitle>
-                  <v-radio-group v-model="userChoice" row mandatory>
-                    <v-radio label="すべてのユーザー" :value="2"></v-radio>
-                    <v-radio label="削除されたユーザー以外" :value="1"></v-radio>
-                    <v-radio label="削除されたユーザーのみ" :value="0"></v-radio>
-                  </v-radio-group>
-                </v-col>
-              </v-row>
-            </v-list-item>
-          </v-list>
-          <v-card-actions>
-            <v-btn color="primary" @click="searchUserList" class="text-capitalize"> 検索 </v-btn>
-            <v-btn
-              text
-              outlined
-              color="primary"
-              class="text-capitalize"
-              @click="searchUserMenu = false"
-            >
-              キャンセル
-            </v-btn>
-          </v-card-actions>
-        </v-form>
-      </v-card>
-    </v-menu>
+
     <v-spacer></v-spacer>
     <v-col cols="3">
       <!-- CSVインポート -->
@@ -193,12 +119,8 @@ export default {
     PageHeadComponent,
   },
   data: () => ({
-    // 検索用メニュー
-    searchUserMenu: false,
-    valid: true,
-    userChoice: 2,
-    dialogEdit: false,
     pageHeadTitle: "管理ユーザー登録",
+    dialogEdit: false,
 
     headers: [
       { text: "ユーザーID", value: "adminUserId", align: "start" },
@@ -329,39 +251,11 @@ export default {
     editNewItem() {
       this.dialogEdit = true;
     },
-    // 検索条件を初期化
-    resetSearch() {
-      this.initialize();
-    },
-    // 検索条件にあったデータにフィルタリング
-    searchUserList() {
-      this.email = this.editedItem.email;
-      this.name = this.editedItem.name;
-      let searchUserLists = this.adminUserList.filter((searchUsers) => {
-        if (this.name && searchUsers.name && !searchUsers.name.includes(this.name)) {
-          return false;
-        }
-        if (this.email && searchUsers.email !== this.email) {
-          return false;
-        }
-        return true;
-      });
-      if (this.userChoice === 0) {
-        // 削除されたユーザーのみ表示
-        this.adminUserList = searchUserLists.filter((searchUsers) => searchUsers.status === true);
-      } else if (this.userChoice === 1) {
-        // 削除されたユーザーは表示しない
-        this.adminUserList = searchUserLists.filter((searchUsers) => searchUsers.status === false);
-      } else {
-        // すべてのユーザーを表示
-        this.adminUserList = searchUserLists;
-      }
-      this.searchUserMenu = false;
-    },
     // csvエクスポート処理
     csvExport: function () {
       // 各テーブルヘッダーと現在表示されている項目がCSV出力される
-      downloadCsv(this.adminUserList);
+      const fileName = "adminUserList";
+      downloadCsv(this.adminUserList, "", fileName);
       this.close();
     },
     // csvインポート処理

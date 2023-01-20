@@ -236,25 +236,25 @@ export default {
       this.appUserList = [
         {
           userId: 1,
-          name: "たろう",
+          name: "山田太郎",
           email: "aaa@gmail.com",
           status: false,
         },
         {
           userId: 2,
-          name: "じろう",
+          name: "山田次郎",
           email: "bbb@gmail.com",
           status: true,
         },
         {
           userId: 3,
-          name: "まさむね",
+          name: "山田まさむね",
           email: "ccc@gmail.com",
           status: false,
         },
         {
           userId: 4,
-          name: "さぶろう",
+          name: "山田さぶろう",
           email: "ddd@gmail.com",
           status: true,
         },
@@ -266,7 +266,7 @@ export default {
         },
         {
           userId: 6,
-          name: "Eclair",
+          name: "Eric",
           email: "oooo@gmail.com",
           status: false,
         },
@@ -278,19 +278,19 @@ export default {
         },
         {
           userId: 8,
-          name: "Eclair",
+          name: "Sam",
           email: "daad@gmail.com",
           status: false,
         },
         {
           userId: 9,
-          name: "Eclair",
+          name: "山田Eclair",
           email: "kkk@gmail.com",
           status: false,
         },
         {
           userId: 10,
-          name: "Eclair",
+          name: "エリック",
           email: "iii@gmail.com",
           status: false,
         },
@@ -386,7 +386,8 @@ export default {
     // csvエクスポート処理
     csvExport: function () {
       // 各テーブルヘッダーと現在表示されている項目がCSV出力される
-      downloadCsv(this.appUserList);
+      const fileName = "appUserList";
+      downloadCsv(this.appUserList, "", fileName);
       this.close();
     },
     // csvインポート処理
@@ -414,6 +415,7 @@ export default {
             name: csvListData[1],
             email: csvListData[2],
           };
+          console.log(csvList);
 
           csvLists.push(csvList);
         });
